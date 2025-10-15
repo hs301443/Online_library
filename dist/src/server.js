@@ -14,6 +14,7 @@ const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const helmet_1 = __importDefault(require("helmet"));
 const connection_1 = require("./models/connection");
+const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 (0, connection_1.connectDB)();
@@ -22,7 +23,8 @@ app.use((0, cors_1.default)({ origin: "*" }));
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json({ limit: "20mb" }));
 app.use(express_1.default.urlencoded({ extended: true, limit: "20mb" }));
-app.use("/uploads", express_1.default.static("uploads"));
+const uploadsPath = path_1.default.join(__dirname, "../uploads");
+app.use("/uploads", express_1.default.static(uploadsPath));
 // Routes
 app.use("/api", routes_1.default);
 app.use((req, res, next) => {

@@ -9,6 +9,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { connectDB } from "./models/connection";
+import path from "path";
 
 
 dotenv.config();
@@ -21,8 +22,8 @@ app.use(cors({ origin: "*" }));
 app.use(cookieParser());
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
-app.use("/uploads", express.static("uploads"));
-
+const uploadsPath = path.join(__dirname, "../uploads");
+app.use("/uploads", express.static(uploadsPath));
 // Routes
 app.use("/api", ApiRoute);
 
