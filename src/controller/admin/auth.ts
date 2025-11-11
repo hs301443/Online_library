@@ -1,51 +1,37 @@
 import { Request, Response } from "express";
-import { AdminModel } from "../../models/schema/auth/Admin";
+import { User } from "../../models/schema/auth/User";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { UnauthorizedError } from "../../Errors";
+import { ForbiddenError, UnauthorizedError } from "../../Errors";
 import { SuccessResponse } from "../../utils/response";
+import { BadRequest } from "../../Errors/BadRequest";
+import { generateToken } from "../../utils/auth";
+import { Types } from "mongoose";
 
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    throw new UnauthorizedError("Email and password are required");
-  }
+  if (!email || !password) throw new BadRequest("Email and password are required");
 
-  const admin = await AdminModel.findOne({ email }).populate("role");
-  if (!admin) {
+  const user = await User.findOne({ email }).select("+password");
+  if (!user || !user.password)
     throw new UnauthorizedError("Invalid email or password");
-  }
 
-  const isPasswordValid = await bcrypt.compare(password, admin.hashedPassword);
-  if (!isPasswordValid) {
-    throw new UnauthorizedError("Invalid email or password");
-  }
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) throw new UnauthorizedError("Invalid email or password");
 
- 
-  // توليد التوكن
-  const token = jwt.sign(
+  if (!user.emailVerified)
+    throw new ForbiddenError("Please verify your email first.");
+
+  // 🔹 Generate JWT (valid 7 days)
+  const token = generateToken(
     {
-      sub: admin._id.toString(),
-      name: admin.name,
-      email: admin.email,
+      id: (user._id as Types.ObjectId).toString(),
+      name: user.name,
+      role: user.role,
     },
-    process.env.JWT_SECRET as string,
-    { expiresIn: "7d" }
   );
 
-  return SuccessResponse(
-    res,
-    {
-      message: "Login successful",
-      token,
-      admin: {
-        id: admin._id.toString(),
-        name: admin.name,
-        email: admin.email,
-      },
-    },
-    200
-  );
+  SuccessResponse(res, { message: "Login successful.", token }, 200);
 };

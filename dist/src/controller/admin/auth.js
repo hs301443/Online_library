@@ -4,38 +4,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = void 0;
-const Admin_1 = require("../../models/schema/auth/Admin");
+const User_1 = require("../../models/schema/auth/User");
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const Errors_1 = require("../../Errors");
 const response_1 = require("../../utils/response");
+const BadRequest_1 = require("../../Errors/BadRequest");
+const auth_1 = require("../../utils/auth");
 const login = async (req, res) => {
     const { email, password } = req.body;
-    if (!email || !password) {
-        throw new Errors_1.UnauthorizedError("Email and password are required");
-    }
-    const admin = await Admin_1.AdminModel.findOne({ email }).populate("role");
-    if (!admin) {
+    if (!email || !password)
+        throw new BadRequest_1.BadRequest("Email and password are required");
+    const user = await User_1.User.findOne({ email }).select("+password");
+    if (!user || !user.password)
         throw new Errors_1.UnauthorizedError("Invalid email or password");
-    }
-    const isPasswordValid = await bcrypt_1.default.compare(password, admin.hashedPassword);
-    if (!isPasswordValid) {
+    const isMatch = await bcrypt_1.default.compare(password, user.password);
+    if (!isMatch)
         throw new Errors_1.UnauthorizedError("Invalid email or password");
-    }
-    // توليد التوكن
-    const token = jsonwebtoken_1.default.sign({
-        sub: admin._id.toString(),
-        name: admin.name,
-        email: admin.email,
-    }, process.env.JWT_SECRET, { expiresIn: "7d" });
-    return (0, response_1.SuccessResponse)(res, {
-        message: "Login successful",
-        token,
-        admin: {
-            id: admin._id.toString(),
-            name: admin.name,
-            email: admin.email,
-        },
-    }, 200);
+    if (!user.emailVerified)
+        throw new Errors_1.ForbiddenError("Please verify your email first.");
+    // 🔹 Generate JWT (valid 7 days)
+    const token = (0, auth_1.generateToken)({
+        id: user._id.toString(),
+        name: user.name,
+        role: user.role,
+    });
+    (0, response_1.SuccessResponse)(res, { message: "Login successful.", token }, 200);
 };
 exports.login = login;

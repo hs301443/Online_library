@@ -1,11 +1,28 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Category = void 0;
+// models/schema/library/Category.ts
 const mongoose_1 = require("mongoose");
 const CategorySchema = new mongoose_1.Schema({
-    name: { type: String, required: true, trim: true },
-    icon: { type: String },
-    parentId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Category', default: null },
-}, { timestamps: true });
+    name: {
+        type: String,
+        required: true,
+        trim: true,
+        unique: true,
+    },
+    icon: {
+        type: String,
+        trim: true,
+    },
+    parentId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Category",
+        default: null,
+    },
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+});
 CategorySchema.index({ parentId: 1 });
-exports.Category = (0, mongoose_1.model)('Category', CategorySchema);
+exports.Category = (0, mongoose_1.model)("Category", CategorySchema);

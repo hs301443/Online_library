@@ -27,10 +27,10 @@ const verifyGoogleToken = async (req, res) => {
         const name = payload.name || "Unknown User";
         const googleId = payload.sub;
         // 🔍 check if user exists by googleId OR email
-        let user = await User_1.UserModel.findOne({ $or: [{ googleId }, { email }] });
+        let user = await User_1.User.findOne({ $or: [{ googleId }, { email }] });
         if (!user) {
             // ➕ Signup (new user)
-            user = new User_1.UserModel({
+            user = new User_1.User({
                 googleId,
                 email,
                 name,
