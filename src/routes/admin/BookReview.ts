@@ -1,7 +1,8 @@
 import { Router } from "express";
-import  {getAllReviews,deleteReviewByAdmin} from "../../controller/admin/BookReview"
+import  {getBookReviews,deleteReviewByAdmin} from "../../controller/admin/BookReview"
+import { catchAsync } from "../../utils/catchAsync";
 
 const router = Router();
-router.get("/", getAllReviews);
-router.delete("/:id", deleteReviewByAdmin);
+router.get("/:bookId", catchAsync(getBookReviews));
+router.delete("/:id", catchAsync(deleteReviewByAdmin));
 export default router;

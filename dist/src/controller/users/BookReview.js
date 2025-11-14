@@ -51,7 +51,9 @@ exports.deleteReview = deleteReview;
 // جلب كل تقييمات المستخدم
 const getUserReviews = async (req, res) => {
     const userId = req.user?.id;
-    const reviews = await BookReview_1.BookReview.find({ userId }).populate("bookId");
+    const reviews = await BookReview_1.BookReview.find({ userId: userId })
+        .populate("bookId")
+        .populate("userId", "name photo");
     (0, response_1.SuccessResponse)(res, { message: "User reviews fetched", reviews });
 };
 exports.getUserReviews = getUserReviews;
@@ -63,7 +65,7 @@ const getBookReviews = async (req, res) => {
     if (!book)
         throw new NotFound_1.NotFound("Book not found");
     // جلب كل التقييمات الخاصة بالكتاب
-    const reviews = await BookReview_1.BookReview.find({ bookId }).populate("userId", "name email");
+    const reviews = await BookReview_1.BookReview.find({ bookId }).populate("userId", "name photo");
     (0, response_1.SuccessResponse)(res, { message: "Book reviews fetched", book, reviews });
 };
 exports.getBookReviews = getBookReviews;

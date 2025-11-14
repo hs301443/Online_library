@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BookModel = void 0;
 const mongoose_1 = require("mongoose");
 const BookSchema = new mongoose_1.Schema({
-    name: { type: String, required: true },
+    name: { type: String, required: true, unique: true },
     categoryId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Category', required: true },
     mainImage: { type: String },
     gallery: [{ type: String }],
@@ -17,8 +17,8 @@ const BookSchema = new mongoose_1.Schema({
     edition: { type: String },
     Synopsis: { type: String },
     numPages: { type: Number, min: 1 },
-    condition: { type: String, enum: ['new', 'good', 'fair', 'poor'], default: 'good' },
-    weight: { type: Number }, // جرام
+    condition: { type: String, enum: ['new', 'old'], default: 'new' },
+    weight: { type: Number },
 }, { timestamps: true });
 BookSchema.index({ categoryId: 1 });
 BookSchema.index({ name: 'text' }); // للبحث

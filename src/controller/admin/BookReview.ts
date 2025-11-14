@@ -2,13 +2,22 @@ import { Request, Response } from "express";
 import { BookReview } from "../../models/schema/BookReview";
 import { BookModel } from "../../models/schema/books";
 import { SuccessResponse } from "../../utils/response";
-import { BadRequest } from "../../Errors/BadRequest";
-import { NotFound } from "../../Errors/NotFound";
+import { NotFound } from "../../Errors";
 
-export const getAllReviews = async (_req: Request, res: Response) => {
-  const reviews = await BookReview.find().populate("bookId").populate("userId");
-  SuccessResponse(res, { message: "All reviews fetched", reviews });
+
+export const getBookReviews = async (req: Request, res: Response) => {
+  const { bookId } = req.params;
+
+  // التأكد من وجود الكتاب
+  const book = await BookModel.findById(bookId);
+  if (!book) throw new NotFound("Book not found");
+
+  // جلب كل التقييمات الخاصة بالكتاب
+  const reviews = await BookReview.find({ bookId }).populate("userId", "name photo");
+
+  SuccessResponse(res, { message: "Book reviews fetched", book, reviews });
 };
+
 
 // حذف تقييم أي مستخدم
 export const deleteReviewByAdmin = async (req: Request, res: Response) => {

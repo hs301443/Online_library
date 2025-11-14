@@ -23,7 +23,7 @@ export interface IBook extends Document {
 
 const BookSchema = new Schema<IBook>(
   {
-    name: { type: String, required: true },
+    name: { type: String, required: true, unique: true },
     categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
     mainImage: { type: String },
     gallery: [{ type: String }],
@@ -37,8 +37,8 @@ const BookSchema = new Schema<IBook>(
     edition: { type: String },
     Synopsis: { type: String },
     numPages: { type: Number, min: 1 },
-    condition: { type: String, enum: ['new', 'good', 'fair', 'poor'], default: 'good' },
-    weight: { type: Number }, // جرام
+    condition: { type: String, enum: ['new', 'old'], default: 'new' },
+    weight: { type: Number }, 
   },
   { timestamps: true }
 );
