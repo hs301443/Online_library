@@ -37,7 +37,6 @@ const UserSchema = new Schema<IUser>(
 );
 
 // === Indexes مهمة ===
-UserSchema.index({ email: 1 });           // للبحث السريع
 UserSchema.index({ googleId: 1 });        // لتسجيل الدخول بجوجل
 UserSchema.index({ fcmtoken: 1 });        // لإرسال FCM
 UserSchema.index({ role: 1 });            // للـ admin panel
