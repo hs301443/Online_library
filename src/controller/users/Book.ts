@@ -17,3 +17,33 @@ export const getBookById = async (req: Request, res: Response) => {
 
    SuccessResponse(res,{message:"Book fetched successfully", book});
 };
+
+
+export const searchBooks = async (req: Request, res: Response) => {
+  const { query = "", category } = req.query;
+
+  // تحويل query لكلمة نص
+  const searchTerm = String(query);
+
+  const filter: any = {};
+
+  // لو تم اختيار كاتيجوري
+  if (category) {
+    filter.categoryId = category;
+  }
+
+  // لو في كلمة بحث
+  if (searchTerm.trim().length > 0) {
+    filter.$or = [
+      { name: { $regex: searchTerm, $options: "i" } },
+      { title: { $regex: searchTerm, $options: "i" } },
+      { publisher: { $regex: searchTerm, $options: "i" } },
+      { language: { $regex: searchTerm, $options: "i" } },
+      { writer: { $regex: searchTerm, $options: "i" } },
+    ];
+  }
+
+  const books = await BookModel.find(filter).populate("categoryId");
+
+  return SuccessResponse(res, { books });
+};

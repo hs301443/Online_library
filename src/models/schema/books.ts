@@ -15,7 +15,7 @@ export interface IBook extends Document {
   edition?: string;
   numPages?: number;
   dayesofreturn?: number;
-  condition?: 'new' | 'good' | 'fair' | 'poor';
+  condition?: 'new' | 'old' ;
   weight?: number;
   Synopsis?: string;
   createdAt: Date;

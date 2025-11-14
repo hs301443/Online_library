@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBookById = exports.getAllBooks = void 0;
+exports.searchBooks = exports.getBookById = exports.getAllBooks = void 0;
 const books_1 = require("../../models/schema/books");
 const response_1 = require("../../utils/response");
 const NotFound_1 = require("../../Errors/NotFound");
@@ -17,3 +17,26 @@ const getBookById = async (req, res) => {
     (0, response_1.SuccessResponse)(res, { message: "Book fetched successfully", book });
 };
 exports.getBookById = getBookById;
+const searchBooks = async (req, res) => {
+    const { query = "", category } = req.query;
+    // تحويل query لكلمة نص
+    const searchTerm = String(query);
+    const filter = {};
+    // لو تم اختيار كاتيجوري
+    if (category) {
+        filter.categoryId = category;
+    }
+    // لو في كلمة بحث
+    if (searchTerm.trim().length > 0) {
+        filter.$or = [
+            { name: { $regex: searchTerm, $options: "i" } },
+            { title: { $regex: searchTerm, $options: "i" } },
+            { publisher: { $regex: searchTerm, $options: "i" } },
+            { language: { $regex: searchTerm, $options: "i" } },
+            { writer: { $regex: searchTerm, $options: "i" } },
+        ];
+    }
+    const books = await books_1.BookModel.find(filter).populate("categoryId");
+    return (0, response_1.SuccessResponse)(res, { books });
+};
+exports.searchBooks = searchBooks;
