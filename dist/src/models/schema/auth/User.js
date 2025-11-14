@@ -20,7 +20,6 @@ const UserSchema = new mongoose_1.Schema({
     toObject: { virtuals: true }
 });
 // === Indexes مهمة ===
-UserSchema.index({ googleId: 1 }); // لتسجيل الدخول بجوجل
 UserSchema.index({ fcmtoken: 1 }); // لإرسال FCM
 UserSchema.index({ role: 1 }); // للـ admin panel
 exports.User = (0, mongoose_1.model)('User', UserSchema);
