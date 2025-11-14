@@ -9,6 +9,7 @@ const auth_1 = __importDefault(require("./auth"));
 const category_1 = __importDefault(require("./category"));
 const books_1 = __importDefault(require("./books"));
 const BookReview_1 = __importDefault(require("./BookReview"));
+const notification_1 = __importDefault(require("./notification"));
 const authenticated_1 = require("../../middlewares/authenticated");
 const authorized_1 = require("../../middlewares/authorized");
 exports.route = (0, express_1.Router)();
@@ -17,4 +18,5 @@ exports.route.use(authenticated_1.authenticated, (0, authorized_1.authorizeRoles
 exports.route.use("/categories", category_1.default);
 exports.route.use("/books", books_1.default);
 exports.route.use("/book-reviews", BookReview_1.default);
+exports.route.use("/notification", notification_1.default);
 exports.default = exports.route;

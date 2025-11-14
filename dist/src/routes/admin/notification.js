@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const notification_1 = require("../../controller/admin/notification");
+const catchAsync_1 = require("../../utils/catchAsync");
+const router = (0, express_1.Router)();
+router.post('/', (0, catchAsync_1.catchAsync)(notification_1.sendNotificationToAll));
+router.post('/:userId', (0, catchAsync_1.catchAsync)(notification_1.sendNotificationToSingle));
+router.get('/', (0, catchAsync_1.catchAsync)(notification_1.getAllNotifications));
+router.get('/:id', (0, catchAsync_1.catchAsync)(notification_1.getNotificationById));
+router.delete('/:id', (0, catchAsync_1.catchAsync)(notification_1.deleteNotification));
+exports.default = router;

@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Notification = void 0;
+exports.NotificationModels = void 0;
 // models/Notification.ts
 const mongoose_1 = __importStar(require("mongoose"));
 const NotificationSchema = new mongoose_1.Schema({
@@ -41,6 +41,4 @@ const NotificationSchema = new mongoose_1.Schema({
     body: { type: String, required: true },
     relatedId: { type: mongoose_1.Schema.Types.ObjectId },
 }, { timestamps: true });
-// فهرسة للبحث حسب النوع والتاريخ
-NotificationSchema.index({ type: 1, createdAt: -1 });
-exports.Notification = mongoose_1.default.model('Notification', NotificationSchema);
+exports.NotificationModels = mongoose_1.default.model('Notification', NotificationSchema);

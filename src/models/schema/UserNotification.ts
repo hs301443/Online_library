@@ -34,4 +34,4 @@ UserNotificationSchema.index({ user: 1, notification: 1 }, { unique: true });
 // فهرسة لجلب الإشعارات غير المقروءة بسرعة
 UserNotificationSchema.index({ user: 1, read: 1, createdAt: -1 });
 
-export const UserNotification = mongoose.model<IUserNotification>('UserNotification', UserNotificationSchema);
+export const UserNotificationModel = mongoose.model<IUserNotification>('UserNotification', UserNotificationSchema);

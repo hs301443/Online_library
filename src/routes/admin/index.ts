@@ -3,6 +3,7 @@ import authRouter from "./auth";
 import CategoryRouter from "./category";
 import BookRouter from "./books";
 import BookReviewRouter from "./BookReview";
+import NotificationRouter from "./notification";
 import { authenticated } from "../../middlewares/authenticated";
 import {  authorizeRoles } from "../../middlewares/authorized";
 
@@ -13,4 +14,5 @@ route.use(authenticated,authorizeRoles("admin"));
 route.use("/categories", CategoryRouter);
 route.use("/books", BookRouter);
 route.use("/book-reviews", BookReviewRouter);
+route.use("/notification", NotificationRouter);
 export default route;

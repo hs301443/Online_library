@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserNotification = void 0;
+exports.UserNotificationModel = void 0;
 // models/UserNotification.ts
 const mongoose_1 = __importStar(require("mongoose"));
 const UserNotificationSchema = new mongoose_1.Schema({
@@ -54,4 +54,4 @@ const UserNotificationSchema = new mongoose_1.Schema({
 UserNotificationSchema.index({ user: 1, notification: 1 }, { unique: true });
 // فهرسة لجلب الإشعارات غير المقروءة بسرعة
 UserNotificationSchema.index({ user: 1, read: 1, createdAt: -1 });
-exports.UserNotification = mongoose_1.default.model('UserNotification', UserNotificationSchema);
+exports.UserNotificationModel = mongoose_1.default.model('UserNotification', UserNotificationSchema);
