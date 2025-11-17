@@ -6,4 +6,5 @@ const catchAsync_1 = require("../../utils/catchAsync");
 const router = (0, express_1.Router)();
 router.get("/", (0, catchAsync_1.catchAsync)(Category_1.getCategories));
 router.get("/:id", (0, catchAsync_1.catchAsync)(Category_1.getCategoryById));
+router.get("/:id/books", (0, catchAsync_1.catchAsync)(Category_1.getBooksByCategory));
 exports.default = router;
