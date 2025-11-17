@@ -5,7 +5,7 @@ const User_1 = require("../../models/schema/auth/User");
 const response_1 = require("../../utils/response");
 const BadRequest_1 = require("../../Errors/BadRequest");
 const NotFound_1 = require("../../Errors/NotFound");
-const handleImages_1 = require("../../utils/handleImages");
+const cloudinary_1 = require("../../utils/cloudinary");
 const getprofile = async (req, res) => {
     let userId = req.user?.id;
     if (!userId)
@@ -16,8 +16,9 @@ const getprofile = async (req, res) => {
     (0, response_1.SuccessResponse)(res, { message: "User profile fetched", user });
 };
 exports.getprofile = getprofile;
+// دالة مساعدة لرفع Base64 على Cloudinary
 const updateprofile = async (req, res) => {
-    let userId = req.user?.id;
+    const userId = req.user?.id;
     if (!userId)
         throw new BadRequest_1.BadRequest("User not authenticated");
     const user = await User_1.User.findById(userId).select("-password");
@@ -32,10 +33,11 @@ const updateprofile = async (req, res) => {
     if (req.body.image) {
         const { image } = req.body;
         try {
-            const photo = await (0, handleImages_1.saveBase64Image)(image, "users", req, "uploads");
-            user.photo = photo;
+            // رفع الصورة على Cloudinary بدل السيرفر المحلي
+            const photoUrl = await (0, cloudinary_1.uploadBase64ToCloudinary)(image, "users");
+            user.photo = photoUrl;
         }
-        catch {
+        catch (err) {
             throw new BadRequest_1.BadRequest("Invalid Base64 image format");
         }
     }

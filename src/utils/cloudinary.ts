@@ -8,4 +8,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+
 export default cloudinary;
+
+export const uploadBase64ToCloudinary = async (base64: string, folder: string) => {
+  const result = await cloudinary.uploader.upload(base64, { folder });
+  return result.secure_url;
+};

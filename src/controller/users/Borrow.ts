@@ -11,8 +11,11 @@ import { NotFound } from "../../Errors";
 import { BadRequest } from "../../Errors/BadRequest";
 import { SuccessResponse } from "../../utils/response";
 import { Request, Response } from "express";
+import { uploadBase64ToCloudinary } from "../../utils/cloudinary";
 // استعار الكتاب مباشرة
 // استعار الكتاب مباشرة مع QR يحتوي على جميع التفاصيل
+
+// ===================== Borrow Book =====================
 export const borrowBook = async (req: Request, res: Response) => {
   const { bookId } = req.params;
   const userId = req.user?.id;
@@ -26,30 +29,22 @@ export const borrowBook = async (req: Request, res: Response) => {
   const user = await User.findById(userId);
   if (!user) throw new NotFound("User not found");
 
-  // حماية: التحقق إذا المستخدم لديه نفس الكتاب على حالة on_borrow
-  const existingBorrow = await Borrow.findOne({
-    userId,
-    bookId,
-    status: "on_borrow",
-  });
-  if (existingBorrow) {
-    throw new BadRequest("You already have this book borrowed");
-  }
+  const existingBorrow = await Borrow.findOne({ userId, bookId, status: "on_borrow" });
+  if (existingBorrow) throw new BadRequest("You already have this book borrowed");
 
   const now = new Date();
   const borrowDate = now;
   const borrowTime = now.toTimeString().slice(0, 5);
   const dateOnly = now.toISOString().split("T")[0];
 
-  // استخدام daysOfReturn من الكتاب بدل الرقم الثابت
   const mustReturnDate = new Date();
-  mustReturnDate.setDate(borrowDate.getDate() + (book.dayesofreturn || 7)); // 7 أيام افتراضي
+  mustReturnDate.setDate(borrowDate.getDate() + (book.dayesofreturn || 7));
   const returnDateOnly = mustReturnDate.toISOString().split("T")[0];
 
-  // توليد QR للاستعارة فقط، بدون تغيير المخزون أو الحالة
+  // توليد QR Base64
   const qrText = `Book: ${book.name}\nUser: ${user.name}\nBorrow Date: ${dateOnly}\nBorrow Time: ${borrowTime}\nReturn By: ${returnDateOnly}`;
   const qrCodeBase64 = await QRCode.toDataURL(qrText);
-  const qrCodeUrl = await saveBase64Image(qrCodeBase64, `${userId}_${bookId}`, req, "qrcodes");
+  const qrCodeUrl = await uploadBase64ToCloudinary(qrCodeBase64, "qrcodes");
 
   const borrow = await Borrow.create({
     userId,
@@ -57,12 +52,10 @@ export const borrowBook = async (req: Request, res: Response) => {
     borrowDate,
     borrowTime,
     mustReturnDate,
-    status: "pending", // الحالة تظل pending حتى الأدمن يؤكد
+    status: "pending",
     qrCodeBorrow: qrCodeUrl,
     qrBorrowExpiresAt: new Date(now.getTime() + 3 * 60 * 60 * 1000), // صلاحية 3 ساعات
   });
-
-  // لا يتم تحديث المخزون إلا بعد تأكيد الأدمن
 
   const borrowResponse = {
     _id: borrow._id,
@@ -71,22 +64,20 @@ export const borrowBook = async (req: Request, res: Response) => {
     borrowDate: dateOnly,
     borrowTime,
     mustReturnDate: returnDateOnly,
-    status: borrow.status, // pending
+    status: borrow.status,
     qrCodeBorrow: qrCodeUrl,
   };
 
   return SuccessResponse(res, { borrow: borrowResponse, qrCodeBorrow: qrCodeUrl });
 };
 
-
-// إعادة الكتاب
+// ===================== Return Book =====================
 export const returnBook = async (req: Request, res: Response) => {
   const { borrowId } = req.params;
   const userId = req.user?.id;
   if (!borrowId) throw new BadRequest("BorrowId is required");
   if (!userId) throw new BadRequest("User not found");
 
-  // جلب الـ borrow مع populated fields
   const borrow = await Borrow.findById(borrowId)
     .populate<{ bookId: IBook & Document; userId: IUser & Document }>("bookId userId");
 
@@ -95,24 +86,21 @@ export const returnBook = async (req: Request, res: Response) => {
   const bookDoc = borrow.bookId as IBook & Document;
   const userDoc = borrow.userId as IUser & Document;
 
-  // تحقق من صلاحية المستخدم
   if (!userDoc._id || (userDoc._id as any).toString() !== userId)
     throw new BadRequest("Unauthorized");
 
-  if (borrow.status !== "on_borrow") 
+  if (borrow.status !== "on_borrow")
     throw new BadRequest("Book is not currently borrowed");
 
   const now = new Date();
   const returnDateOnly = now.toISOString().split("T")[0];
 
-  // توليد QR للإرجاع فقط (لا تغيير الحالة ولا المخزون)
   const qrText = `Book: ${bookDoc.name}\nUser: ${userDoc.name}\nReturn Date: ${returnDateOnly}`;
   const qrCodeBase64 = await QRCode.toDataURL(qrText);
-  const qrCodeUrl = await saveBase64Image(qrCodeBase64, `${userId}_${bookDoc._id}_return`, req, "qrcodes");
+  const qrCodeUrl = await uploadBase64ToCloudinary(qrCodeBase64, "qrcodes");
 
-  // تخزين QR وصلاحية مسحها فقط
   borrow.qrCodeReturn = qrCodeUrl;
-  borrow.qrReturnExpiresAt = new Date(now.getTime() + 3 * 60 * 60 * 1000); // 3 ساعات
+  borrow.qrReturnExpiresAt = new Date(now.getTime() + 3 * 60 * 60 * 1000);
   await borrow.save();
 
   const borrowResponse = {
@@ -123,12 +111,11 @@ export const returnBook = async (req: Request, res: Response) => {
     borrowTime: borrow.borrowTime,
     mustReturnDate: borrow.mustReturnDate.toISOString().split("T")[0],
     qrCodeReturn: qrCodeUrl,
-    status: borrow.status, // تظل "on_borrow" حتى تأكيد الأدمن
+    status: borrow.status,
   };
 
   return SuccessResponse(res, { borrow: borrowResponse, qrCodeReturn: qrCodeUrl });
 };
-
 // استعراض كتب اليوزر
 export const getUserBorrows = async (req: Request, res: Response) => {
   const userId = req.user?.id;
