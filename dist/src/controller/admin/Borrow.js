@@ -27,6 +27,13 @@ const scanBorrowQR = async (req, res) => {
     borrow.scannedByAdminAt = new Date();
     borrow.status = "on_borrow"; // تحويل الحالة بعد سكان QR
     await borrow.save();
+    // تحديث stock الكتاب
+    const bookDoc = borrow.bookId;
+    if (bookDoc) {
+        bookDoc.numberInStock -= 1;
+        bookDoc.borrowedBy += 1;
+        await bookDoc.save();
+    }
     return (0, response_1.SuccessResponse)(res, { borrow });
 };
 exports.scanBorrowQR = scanBorrowQR;

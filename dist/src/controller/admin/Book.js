@@ -6,6 +6,7 @@ const response_1 = require("../../utils/response");
 const BadRequest_1 = require("../../Errors/BadRequest");
 const NotFound_1 = require("../../Errors/NotFound");
 const handleImages_1 = require("../../utils/handleImages");
+const deleteImage_1 = require("../../utils/deleteImage");
 // إنشاء كتاب
 const createBook = async (req, res) => {
     const { name, categoryId, numberOfCopies, numberInStock, publisher, writer, language, dayesofreturn, publishYear, edition, numPages, condition, weight, Synopsis, gallery, mainImage } = req.body;
@@ -110,6 +111,13 @@ const deleteBook = async (req, res) => {
     const book = await books_1.BookModel.findByIdAndDelete(bookID);
     if (!book)
         throw new NotFound_1.NotFound("Book not found");
+    if (book.mainImage)
+        (0, deleteImage_1.deletePhotoFromServer)(book.mainImage);
+    if (book.gallery && Array.isArray(book.gallery)) {
+        for (const img of book.gallery) {
+            (0, deleteImage_1.deletePhotoFromServer)(img);
+        }
+    }
     (0, response_1.SuccessResponse)(res, { message: "Book deleted successfully" });
 };
 exports.deleteBook = deleteBook;

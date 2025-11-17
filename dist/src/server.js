@@ -23,7 +23,8 @@ app.use((0, cors_1.default)({ origin: "*" }));
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json({ limit: "20mb" }));
 app.use(express_1.default.urlencoded({ extended: true, limit: "20mb" }));
-const uploadsPath = path_1.default.join(__dirname, "../uploads");
+// Serve uploads folder (works even after build)
+const uploadsPath = path_1.default.join(process.cwd(), "uploads");
 app.use("/uploads", express_1.default.static(uploadsPath));
 // Routes
 app.use("/api", routes_1.default);
@@ -31,6 +32,7 @@ app.use("/api", routes_1.default);
 app.use((req, res, next) => {
     throw new Errors_1.NotFound("Route not found");
 });
+// Global error handler
 app.use(errorHandler_1.errorHandler);
 const server = http_1.default.createServer(app);
 // Start server
