@@ -52,7 +52,7 @@ export const removeFromFavorites = async (req: Request, res: Response) => {
   SuccessResponse(res, { message: "Book removed from favorites" });
 };
 
-// ✅ 4. Check if a book is in favorites (optional)
+// ✅ 4. Check if a book is  favorites (optional)
 export const isBookInFavorites = async (req: Request, res: Response) => {
   const { bookId } = req.params;
   const userId = req.user?.id;
