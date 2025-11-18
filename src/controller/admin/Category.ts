@@ -127,12 +127,15 @@ export const getCategoryById = async (req: Request, res: Response) => {
         throw new NotFound("Category not found");
     }
 
+    // Get children categories
+    const children = await Category.find({ parentId: id }).select("name");
+
     SuccessResponse(res, {
         message: "Category fetched successfully.",
-        category
+        category,
+        children // Add children here
     }, 200);
 };
-
 
 export const getBooksByCategory = async (req: Request, res: Response) => {
     const { id } = req.params;
