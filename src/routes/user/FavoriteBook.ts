@@ -5,5 +5,5 @@ const router = Router();
 router.post("/", catchAsync(addToFavorites));
 router.get("/", catchAsync(getFavorites));
 router.delete("/:bookId", catchAsync(removeFromFavorites));
-router.get("/:bookId", catchAsync(isBookInFavorites));
+router.get("/check/:bookId", catchAsync(isBookInFavorites));
 export default router;

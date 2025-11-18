@@ -7,5 +7,5 @@ const router = (0, express_1.Router)();
 router.post("/", (0, catchAsync_1.catchAsync)(FavoriteBook_1.addToFavorites));
 router.get("/", (0, catchAsync_1.catchAsync)(FavoriteBook_1.getFavorites));
 router.delete("/:bookId", (0, catchAsync_1.catchAsync)(FavoriteBook_1.removeFromFavorites));
-router.get("/:bookId", (0, catchAsync_1.catchAsync)(FavoriteBook_1.isBookInFavorites));
+router.get("/check/:bookId", (0, catchAsync_1.catchAsync)(FavoriteBook_1.isBookInFavorites));
 exports.default = router;
