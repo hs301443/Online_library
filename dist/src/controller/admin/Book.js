@@ -9,6 +9,8 @@ const response_1 = require("../../utils/response");
 const BadRequest_1 = require("../../Errors/BadRequest");
 const NotFound_1 = require("../../Errors/NotFound");
 const cloudinary_1 = __importDefault(require("../../utils/cloudinary"));
+const BookReview_1 = require("../../models/schema/BookReview");
+const FavoriteBook_1 = require("../../models/schema/FavoriteBook");
 // إنشاء كتاب
 // جلب كل الكتب
 const getAllBooks = async (_req, res) => {
@@ -30,6 +32,8 @@ const deleteBook = async (req, res) => {
     const book = await books_1.BookModel.findByIdAndDelete(bookID);
     if (!book)
         throw new NotFound_1.NotFound("Book not found");
+    const BookReviews = await BookReview_1.BookReview.deleteMany({ bookId: bookID });
+    const favbook = await FavoriteBook_1.FavoriteBook.deleteMany({ bookId: bookID });
     (0, response_1.SuccessResponse)(res, { message: "Book deleted successfully" });
 };
 exports.deleteBook = deleteBook;

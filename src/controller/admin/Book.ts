@@ -5,6 +5,8 @@ import { BadRequest } from "../../Errors/BadRequest";
 import { NotFound } from "../../Errors/NotFound";
 import { saveBase64Image } from "../../utils/handleImages";
 import cloudinary from "../../utils/cloudinary";
+import { BookReview } from "../../models/schema/BookReview";
+import { FavoriteBook } from "../../models/schema/FavoriteBook";
 
 // إنشاء كتاب
 
@@ -31,6 +33,8 @@ export const deleteBook = async (req: Request, res: Response) => {
     const book = await BookModel.findByIdAndDelete(bookID);
     
     if (!book) throw new NotFound("Book not found");
+    const BookReviews=await BookReview.deleteMany({bookId:bookID})
+    const favbook=await FavoriteBook.deleteMany({bookId:bookID});
 
      SuccessResponse(res, {message:"Book deleted successfully"} );
   
