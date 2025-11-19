@@ -19,16 +19,12 @@ const getBookById = async (req, res) => {
 exports.getBookById = getBookById;
 const searchBooks = async (req, res) => {
     const { query = "", category } = req.query;
-    // تحويل query لكلمة نص
     const searchTerm = String(query);
-    const filter = {};
-    // لو تم اختيار كاتيجوري
-    if (category) {
-        filter.categoryId = category;
-    }
-    // لو في كلمة بحث
-    if (searchTerm.trim().length > 0) {
-        filter.$or = [
+    const match = {};
+    if (category)
+        match.categoryId = category;
+    if (searchTerm.trim()) {
+        match.$or = [
             { name: { $regex: searchTerm, $options: "i" } },
             { title: { $regex: searchTerm, $options: "i" } },
             { publisher: { $regex: searchTerm, $options: "i" } },
@@ -36,7 +32,30 @@ const searchBooks = async (req, res) => {
             { writer: { $regex: searchTerm, $options: "i" } },
         ];
     }
-    const books = await books_1.BookModel.find(filter).populate("categoryId");
+    const books = await books_1.BookModel.aggregate([
+        { $match: match },
+        // ربط الريفيوهات بالكتب
+        {
+            $lookup: {
+                from: "bookreviews", // اسم collection في Mongo (تأكد منه)
+                localField: "_id",
+                foreignField: "bookId",
+                as: "reviews",
+            },
+        },
+        // حساب متوسط التقييم
+        {
+            $addFields: {
+                averageRating: { $avg: "$reviews.rating" },
+            },
+        },
+        // لو عايز تخفي reviews
+        {
+            $project: {
+                reviews: 0,
+            },
+        },
+    ]);
     return (0, response_1.SuccessResponse)(res, { books });
 };
 exports.searchBooks = searchBooks;

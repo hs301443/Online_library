@@ -22,19 +22,14 @@ export const getBookById = async (req: Request, res: Response) => {
 export const searchBooks = async (req: Request, res: Response) => {
   const { query = "", category } = req.query;
 
-  // تحويل query لكلمة نص
   const searchTerm = String(query);
 
-  const filter: any = {};
+  const match: any = {};
 
-  // لو تم اختيار كاتيجوري
-  if (category) {
-    filter.categoryId = category;
-  }
+  if (category) match.categoryId = category;
 
-  // لو في كلمة بحث
-  if (searchTerm.trim().length > 0) {
-    filter.$or = [
+  if (searchTerm.trim()) {
+    match.$or = [
       { name: { $regex: searchTerm, $options: "i" } },
       { title: { $regex: searchTerm, $options: "i" } },
       { publisher: { $regex: searchTerm, $options: "i" } },
@@ -43,7 +38,33 @@ export const searchBooks = async (req: Request, res: Response) => {
     ];
   }
 
-  const books = await BookModel.find(filter).populate("categoryId");
+  const books = await BookModel.aggregate([
+    { $match: match },
+
+    // ربط الريفيوهات بالكتب
+    {
+      $lookup: {
+        from: "bookreviews",     // اسم collection في Mongo (تأكد منه)
+        localField: "_id",
+        foreignField: "bookId",
+        as: "reviews",
+      },
+    },
+
+    // حساب متوسط التقييم
+    {
+      $addFields: {
+        averageRating: { $avg: "$reviews.rating" },
+      },
+    },
+
+    // لو عايز تخفي reviews
+    {
+      $project: {
+        reviews: 0,
+      },
+    },
+  ]);
 
   return SuccessResponse(res, { books });
 };
