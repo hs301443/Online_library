@@ -46,11 +46,12 @@ export const removeFromFavorites = async (req: Request, res: Response) => {
 
   if (!userId) throw new BadRequest("User not authenticated");
 
-  const deleted = await FavoriteBook.findByIdAndDelete({ userId, bookId });
+  const deleted = await FavoriteBook.findOneAndDelete({ userId, bookId });
   if (!deleted) throw new NotFound("Book not found in favorites");
 
   SuccessResponse(res, { message: "Book removed from favorites" });
 };
+
 
 // ✅ 4. Check if a book is  favorites (optional)
 export const isBookInFavorites = async (req: Request, res: Response) => {
